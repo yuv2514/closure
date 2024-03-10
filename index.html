@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Search</title>
+  <style>
+    /* Your CSS styles for the movie site */
+  </style>
+</head>
+<body>
+  <div id="app">
+    <input type="text" placeholder="Search for a movie..." id="searchInput">
+    <div id="moviesList"></div>
+  </div>
+
+  <script>
+    const API_KEY = 'your_omdb_api_key'; // Replace with your OMDB API key
+
+    const searchInput = document.getElementById('searchInput');
+    const moviesList = document.getElementById('moviesList');
+
+    let timeoutId;
+
+    async function fetchMovies(query) {
+      const response = await fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`);
+      const data = await response.json();
+      return data.Search || [];
+    }
+
+    function debounce(func, delay) {
+      return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(context, args), delay);
+      };
+    }
+
+    async function showMovies() {
+      const query = searchInput.value.trim();
+      if (query === '') {
+        moviesList.innerHTML = '';
+        return;
+      }
+
+      const movies = await fetchMovies(query);
+      const html = movies.map(movie => `<div>${movie.Title}</div>`).join('');
+      moviesList.innerHTML = html;
+    }
+
+    searchInput.addEventListener('input', debounce(showMovies, 300));
+  </script>
+</body>
+</html>
